@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  etl:
+    build: .
+    container_name: civicflow_etl
+    volumes:
+      - ./output:/app/output:rw
+      - ./logs:/app/logs:rw
+    env_file:
+      - .env
+    # Uncomment the following line for live development (requires code changes to trigger rebuild)
+    # command: python main.py
