@@ -5,7 +5,8 @@ This script runs the complete Extract, Transform, Load pipeline for public data.
 """
 import logging
 import sys
-from src.extract import extract_data
+import os
+from src.extract import extract_facility_data
 from src.transform import transform_data
 from src.load import load_data
 
@@ -26,8 +27,16 @@ def main() -> None:
     """
     logger.info("Starting CivicFlow Open Data ETL pipeline")
     try:
+        # Get configuration from environment
+        api_url = os.getenv("API_URL")
+        fallback_csv_path = os.getenv("FALLBACK_CSV_PATH", "data/fallback_facilities.csv")
+
+        if not api_url:
+            logger.error("API_URL environment variable is not set")
+            sys.exit(1)
+
         # Extract
-        raw_data = extract_data()
+        raw_data = extract_facility_data(api_url, fallback_csv_path)
         # Transform
         cleaned_data = transform_data(raw_data)
         # Load

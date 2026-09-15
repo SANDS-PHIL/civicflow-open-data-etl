@@ -1,50 +1,39 @@
-"""
-Extract module for CivicFlow Open Data ETL.
-
-Handles fetching data from the public API endpoint.
-"""
 import os
 import logging
-from typing import Any, Dict, List
 import requests
-from dotenv import load_dotenv
+import pandas as pd
+from typing import List, Dict, Any
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Configure logger
+# Configure logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
-def extract_data() -> List[Dict[str, Any]]:
+def extract_facility_data(api_url: str, fallback_csv_path: str) -> List[Dict[str, Any]]:
     """
-    Fetch JSON data from the configured public API endpoint.
-
-    Returns:
-        List[Dict[str, Any]]: List of records retrieved from the API.
-
-    Raises:
-        requests.RequestException: If there is an error in the HTTP request.
-        ValueError: If the response is not valid JSON or if the API_URL is not set.
+    Extracts public facility data from a government open data API.
+    Includes an enterprise-grade fallback to a local CSV if the API is unreachable.
     """
-    api_url = os.getenv("API_URL")
-    if not api_url:
-        logger.error("API_URL environment variable is not set")
-        raise ValueError("API_URL environment variable is not set")
+    logger.info(f"Attempting to fetch live data from: {api_url}")
 
-    logger.info(f"Fetching data from {api_url}")
     try:
-        response = requests.get(api_url, timeout=10)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+        # Attempt live API fetch (timeout after 5 seconds to prevent hanging)
+        response = requests.get(api_url, timeout=5.0)
+        response.raise_for_status() # Raise exception for 4xx/5xx HTTP errors
+
+        # Assuming the API returns JSON (common for Socrata/CKAN portals)
+        # If it returns CSV, we would use pd.read_csv(io.StringIO(response.text))
         data = response.json()
-        if not isinstance(data, list):
-            logger.error("Expected a JSON list but got %s", type(data))
-            raise ValueError("Expected a JSON list from the API")
-        logger.info(f"Successfully fetched {len(data)} records")
+        logger.info(f"Successfully fetched {len(data)} live records from API.")
         return data
-    except requests.RequestException as e:
-        logger.error(f"Failed to fetch data from {api_url}: {e}")
-        raise
-    except ValueError as e:
-        logger.error(f"Invalid response from {api_url}: {e}")
-        raise
+
+    except (requests.exceptions.RequestException, ValueError) as e:
+        # Graceful degradation: API failed, fall back to local cache
+        logger.warning(f"Live API extraction failed ({e}). Falling back to local cache: {fallback_csv_path}")
+
+        if not os.path.exists(fallback_csv_path):
+            logger.error(f"Fallback file {fallback_csv_path} not found. Aborting extraction.")
+            raise FileNotFoundError(f"Neither API nor fallback CSV is available.")
+
+        # Read local CSV and convert to list of dictionaries to match JSON structure
+        df = pd.read_csv(fallback_csv_path)
+        logger.info(f"Successfully loaded {len(df)} records from local fallback cache.")
+        return df.to_dict(orient="records")
