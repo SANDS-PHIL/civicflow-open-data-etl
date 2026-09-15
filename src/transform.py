@@ -6,7 +6,7 @@ Handles validating and cleaning the extracted data using Pydantic models.
 import logging
 from typing import List, Dict, Any
 import pandas as pd
-from .models import BuildingConsent
+from .models import PublicFacility
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -21,29 +21,32 @@ def transform_data(raw_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     Returns:
         List of dictionaries that have been validated and cleaned.
-        Each dictionary corresponds to a BuildingConsent model instance.
+        Each dictionary corresponds to a PublicFacility model instance.
     """
     validated_records = []
     for idx, record in enumerate(raw_data):
         try:
             # Map the raw API record to the expected model fields.
             # For the mock API (jsonplaceholder), we map:
-            #   id -> consent_id
-            #   userId -> property_id
-            #   title -> status
-            #   body -> (we don't have a real date, so we use a placeholder)
-            # In a real implementation, the mapping would depend on the API structure.
+            #   id -> facility_id (as string)
+            #   title -> name
+            #   We don't have real data for suburb, status, latitude, longitude, last_inspected, has_accessible_parking,
+            #   so we use placeholders or defaults that satisfy validation.
+            # In a real implementation, the mapping would depend on the actual API structure.
             mapped_record = {
-                "consent_id": record.get("id"),
-                "property_id": record.get("userId"),
-                "status": record.get("title"),
-                # Placeholder date: in a real scenario, this would be a date field from the API.
-                "date_approved": "2023-01-01"
+                "facility_id": str(record.get("id")),
+                "name": record.get("title", "Unnamed Facility"),
+                "suburb": "Wellington Central",  # placeholder
+                "status": "Open",  # placeholder that matches pattern
+                "latitude": -41.29,  # placeholder within NZ range
+                "longitude": 174.78,  # placeholder within NZ range
+                "last_inspected": None,  # placeholder
+                "has_accessible_parking": None  # placeholder
             }
             # Validate and parse the record using the Pydantic model
-            consent = BuildingConsent(**mapped_record)
-            # Convert the model back to a dictionary (with datetime objects)
-            validated_records.append(consent.dict())
+            facility = PublicFacility(**mapped_record)
+            # Convert the model back to a dictionary (with datetime objects if any)
+            validated_records.append(facility.model_dump())
         except Exception as e:
             # Log the error but continue processing other records
             logger.warning(

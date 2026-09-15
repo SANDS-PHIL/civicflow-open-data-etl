@@ -1,46 +1,25 @@
-"""
-Pydantic models for CivicFlow Open Data ETL.
-
-Defines the schema for validated Building Consent records.
-"""
+# src/models.py
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
 
-
-class BuildingConsent(BaseModel):
+class PublicFacility(BaseModel):
     """
-    Schema for a validated Building Consent record.
+    Pydantic model for Wellington City Council Public Facilities (e.g., Toilets, Halls).
+    Enforces strict data governance on messy open data.
     """
-    consent_id: int = Field(..., gt=0, description="Unique identifier for the building consent")
-    property_id: int = Field(..., gt=0, description="Identifier for the property")
-    status: str = Field(..., max_length=50, description="Current status of the consent")
-    date_approved: datetime = Field(..., description="Date when the consent was approved")
+    # Allow extra fields from the raw API without crashing, but ignore them
+    model_config = ConfigDict(extra='ignore')
 
-    @validator('date_approved', pre=True)
-    def parse_date_approved(cls, value):
-        """
-        Parse date_approved from various string formats.
-        If value is already a datetime, return it.
-        """
-        if isinstance(value, datetime):
-            return value
-        # Try common date formats
-        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%Y/%m/%d"):
-            try:
-                return datetime.strptime(value, fmt)
-            except ValueError:
-                continue
-        raise ValueError(f"Unable to parse date: {value}")
+    facility_id: str = Field(..., description="Unique identifier for the asset")
+    name: str = Field(..., min_length=1, max_length=150, description="Facility name")
+    suburb: str = Field(..., description="Wellington suburb location")
+    status: str = Field(..., pattern="^(Open|Closed|Under Maintenance)$", description="Operational status")
 
+    # Geospatial data - required for mapping, validated for NZ coordinates
+    latitude: float = Field(..., ge=-45.0, le=-35.0, description="Latitude in WGS84")
+    longitude: float = Field(..., ge=170.0, le=180.0, description="Longitude in WGS84")
 
-# Example of how to use the model (for documentation)
-if __name__ == "__main__":
-    # This is just for testing the model directly
-    example_data = {
-        "consent_id": 1,
-        "property_id": 101,
-        "status": "Approved",
-        "date_approved": "2023-01-15"
-    }
-    consent = BuildingConsent(**example_data)
-    print(consent)
+    # Optional metadata - often missing in open data, so we make it Optional
+    last_inspected: Optional[datetime] = Field(None, description="Date of last council inspection")
+    has_accessible_parking: Optional[bool] = Field(None, description="Accessibility compliance flag")
