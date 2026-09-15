@@ -1,25 +1,30 @@
 # src/models.py
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, validator
 from typing import Optional
-from datetime import datetime
+from decimal import Decimal
 
-class PublicFacility(BaseModel):
+class DistrictPlanOverlay(BaseModel):
     """
-    Pydantic model for Wellington City Council Public Facilities (e.g., Toilets, Halls).
-    Enforces strict data governance on messy open data.
+    Pydantic model for WCC District Plan GIS Overlays.
+    Enforces data governance on complex planning/geospatial data.
     """
-    # Allow extra fields from the raw API without crashing, but ignore them
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', populate_by_name=True)
 
-    facility_id: str = Field(..., description="Unique identifier for the asset")
-    name: str = Field(..., min_length=1, max_length=150, description="Facility name")
-    suburb: str = Field(..., description="Wellington suburb location")
-    status: str = Field(..., pattern="^(Open|Closed|Under Maintenance)$", description="Operational status")
+    # Core identifier
+    object_id: int = Field(..., alias="OBJECTID", gt=0, description="Unique GIS feature ID")
 
-    # Geospatial data - required for mapping, validated for NZ coordinates
-    latitude: float = Field(..., ge=-45.0, le=-35.0, description="Latitude in WGS84")
-    longitude: float = Field(..., ge=170.0, le=180.0, description="Longitude in WGS84")
+    # Planning metadata
+    symbol_colour: Optional[str] = Field(None, alias="SymbolColour", description="Map visualization colour code")
+    metadata_url: Optional[str] = Field(None, alias="MetadataURL", max_length=500, description="Link to planning documentation")
+    original_data_source: Optional[str] = Field(None, alias="OriginalData", max_length=500, description="Source system reference")
 
-    # Optional metadata - often missing in open data, so we make it Optional
-    last_inspected: Optional[datetime] = Field(None, description="Date of last council inspection")
-    has_accessible_parking: Optional[bool] = Field(None, description="Accessibility compliance flag")
+    # Geospatial validation - ShapeSTArea and ShapeSTLength are GIS geometry properties
+    shape_area: Decimal = Field(..., alias="ShapeSTArea", gt=0, description="Polygon area in square metres")
+    shape_length: Decimal = Field(..., alias="ShapeSTLength", gt=0, description="Polygon perimeter in metres")
+
+    @validator('shape_area')
+    def validate_area_reasonable(cls, v):
+        """Ensure area is within reasonable bounds for Wellington city features"""
+        if v > 10000000:  # 10 km² - larger than most Wellington suburbs
+            raise ValueError('Area exceeds reasonable bounds for a single planning overlay')
+        return v

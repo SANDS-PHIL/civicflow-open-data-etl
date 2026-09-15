@@ -1,50 +1,36 @@
-"""
-Main ETL orchestrator for CivicFlow Open Data ETL.
-
-This script runs the complete Extract, Transform, Load pipeline for public data.
-"""
-import logging
-import sys
 import os
-from src.extract import extract_facility_data
-from src.transform import transform_data
-from src.load import load_data
+from dotenv import load_dotenv
+from src.extract import extract_facility_data  # Function name stays the same
+from src.transform import transform_and_validate
+from src.load import save_to_csv
+import logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-
+logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def main() -> None:
-    """
-    Run the ETL pipeline.
-    """
-    logger.info("Starting CivicFlow Open Data ETL pipeline")
-    try:
-        # Get configuration from environment
-        api_url = os.getenv("API_URL")
-        fallback_csv_path = os.getenv("FALLBACK_CSV_PATH", "data/fallback_facilities.csv")
+def main():
+    load_dotenv()
 
-        if not api_url:
-            logger.error("API_URL environment variable is not set")
-            sys.exit(1)
+    # WCC District Plan GIS Overlays
+    API_URL = os.getenv("API_URL", "https://data-wcc.opendata.arcgis.com/api/download/v1/items/2ba14e04e38442ffb7e39fe622ffacae_19/csv?layers=19")
+    FALLBACK_CSV = os.getenv("FALLBACK_CSV", "data/wcc_district_plan_overlays.csv")
+    OUTPUT_PATH = os.getenv("OUTPUT_PATH", "output/cleaned_district_plan_overlays.csv")
 
-        # Extract
-        raw_data = extract_facility_data(api_url, fallback_csv_path)
-        # Transform
-        cleaned_data = transform_data(raw_data)
-        # Load
-        load_data(cleaned_data)
-        logger.info("ETL pipeline completed successfully")
-    except Exception as e:
-        logger.error(f"ETL pipeline failed: {e}", exc_info=True)
-        sys.exit(1)
+    logger.info("Starting CivicFlow WCC District Plan Data Pipeline")
+    logger.info("This pipeline validates geospatial planning overlays for LIM report integration")
+
+    # 1. Extract
+    raw_data = extract_facility_data(API_URL, FALLBACK_CSV)
+
+    # 2. Transform & Validate
+    clean_data, stats = transform_and_validate(raw_data)
+
+    # 3. Load
+    save_to_csv(clean_data, OUTPUT_PATH)
+
+    logger.info(f"Pipeline complete. {stats['valid']} valid planning overlays saved.")
+    logger.info(f"{stats['invalid']} records rejected due to data quality issues.")
+    logger.info("Clean data ready for LIM report generation and planning consent workflows.")
 
 if __name__ == "__main__":
     main()

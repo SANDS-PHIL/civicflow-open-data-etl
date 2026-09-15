@@ -5,7 +5,7 @@ Handles saving the transformed data to a local file (CSV or Parquet).
 """
 import os
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import pandas as pd
 
 # Configure logger
@@ -67,3 +67,15 @@ def load_data(
     except Exception as e:
         logger.error(f"Failed to save data to {output_path}: {e}")
         raise
+
+def save_to_csv(data: List[Dict[str, Any]], output_path: str) -> None:
+    """
+    Save the transformed data to a CSV file.
+
+    This is a convenience function for CSV-only saving.
+
+    Args:
+        data: List of dictionaries containing the validated records.
+        output_path: The file path to write the CSV file.
+    """
+    load_data(data, output_format="csv", output_path=output_path)

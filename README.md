@@ -4,6 +4,8 @@ A proof-of-concept Extract, Transform, Load (ETL) pipeline designed to help loca
 
 ## Purpose
 
+Designed to help New Zealand local governments (e.g., Wellington City Council) automate and validate public open data pipelines (such as District Plan overlays or public facility assets), preventing geospatial data corruption in downstream systems like LIM report generators or Snowflake data warehouses.
+
 This project provides a reusable skeleton for building ETL pipelines that:
 - Extract data from public REST APIs
 - Transform and validate the data using Pydantic models
@@ -94,12 +96,19 @@ All configuration is done via environment variables (set in `.env`):
 3. Adjust any data cleaning or validation rules as needed.
 4. Update the `.env.example` with the new API endpoint (if different).
 
-### Running Tests
+### 🧪 Running Tests
 
-Currently, there are no unit tests. To test locally:
-1. Ensure you have a public API endpoint that returns JSON data.
-2. Set `API_URL` in your `.env` to that endpoint.
-3. Run `python main.py` and check the output directory for the resulting file.
+To run the unit tests:
+1. Install test dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Execute pytest:
+   ```bash
+   pytest -v
+   ```
+
+This will run the tests in the `tests/` directory and report the results.
 
 ## License
 
