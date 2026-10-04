@@ -1,0 +1,8 @@
+﻿object_id,symbol_colour,metadata_url,original_data_source,shape_area,shape_length
+1001,#003366,https://gis.wcc.govt.nz/arcgis/rest/services/DistrictPlan/MapServer/12,District Plan - Residential Zone,1250.50,145.20
+1002,#006600,https://gis.wcc.govt.nz/arcgis/rest/services/DistrictPlan/MapServer/15,District Plan - Open Space Zone,4500.00,280.50
+1003,#FFCC00,https://gis.wcc.govt.nz/arcgis/rest/services/DistrictPlan/MapServer/18,District Plan - Commercial Zone,850.75,120.10
+1004,#990000,https://gis.wcc.govt.nz/arcgis/rest/services/DistrictPlan/MapServer/22,District Plan - Heritage Overlay,320.25,75.40
+1005,#330033,https://gis.wcc.govt.nz/arcgis/rest/services/DistrictPlan/MapServer/25,District Plan - Natural Hazards,2100.00,190.80
+1006,#666666,https://gis.wcc.govt.nz/arcgis/rest/services/DistrictPlan/MapServer/30,District Plan - Transport Corridor,5400.80,310.50
+1007,#006666,https://gis.wcc.govt.nz/arcgis/rest/services/DistrictPlan/MapServer/33,District Plan - Coastal Environment,8900.00,450.00
