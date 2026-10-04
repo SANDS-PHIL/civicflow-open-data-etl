@@ -1,6 +1,0 @@
-object_id,symbol_colour,metadata_url,original_data_source,shape_area,shape_length
-1,#FF0000,http://example.com/metadata1,Source A,100.5,50.2
-2,#00FF00,http://example.com/metadata2,Source B,200.3,75.8
-3,#0000FF,http://example.com/metadata3,Source C,150.0,60.0
-4,#FFFF00,http://example.com/metadata4,Source D,300.2,90.5
-5,#FF00FF,http://example.com/metadata5,Source E,75.8,45.3

@@ -1,7 +1,0 @@
-OBJECTID,owner_name,property_address,consent_type,consent_date
-1,John Doe,"123 Main St",Building Permit,2023-01-15
-2,Jane Smith,"456 Oak Ave",Resource Consent,2023-02-20
-3,Bob Johnson,"789 Pine Rd",Building Permit,2023-03-10
-4,Alice Brown,"321 Elm Dr",Subdivision,2023-04-05
-5,Charlie Wilson,"654 Cedar Ln",Land Use,2023-05-12
-6,Diana Lee,"987 Birch Blvd",Building Permit,2023-06-18
