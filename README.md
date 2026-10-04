@@ -44,3 +44,77 @@ Designed to help local councils (e.g., Wellington City Council) automate and val
 ├── Dockerfile              # Containerization config
 └── docker-compose.yml      # Multi-container orchestration
 ```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Python 3.10+
+- Docker & Docker Compose (Optional, for containerized run)
+
+### Option 1: Local Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/SANDS-PHIL/civicflow-open-data-etl.git
+   cd civicflow-open-data-etl
+   ```
+
+2. **Set up the virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env to set your API_URL and FALLBACK_CSV paths
+   ```
+
+5. **Run the ETL Pipeline:**
+   ```bash
+   python main.py
+   ```
+
+6. **Launch the Dashboard:**
+   ```bash
+   streamlit run app.py
+   ```
+
+### Option 2: Docker Deployment
+
+For a production-ready, containerized environment:
+
+```bash
+docker-compose up --build
+```
+*The dashboard will be available at `http://localhost:8501`.*
+
+---
+
+## ⚠️ Security & Usage Disclaimer
+
+**IMPORTANT: This is a proof-of-concept for PUBLIC DATA ONLY.**
+
+- **No Internal Data:** Do NOT use this pipeline with internal, confidential, or secure government systems without explicit authorization and a formal security review.
+- **Not a Legal Document:** The generated LIM Summaries are for informational and workflow-acceleration purposes only. They do not replace official LIM reports issued under the Local Government Official Information and Meetings Act 1987.
+- **Compliance:** Users are responsible for complying with all relevant data protection laws (e.g., NZ Privacy Act 2020) and open data licensing agreements.
+
+---
+
+## 🤝 Contributing & Ecosystem Partnership
+
+CivicFlow is built as a digital public good. We welcome contributions, architectural reviews, and ecosystem partnerships from System Integrators, local government IT teams, and civic tech advocates.
+
+For partnership inquiries or pro-bono architectural reviews, please contact the repository owner via LinkedIn or open an Issue.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
