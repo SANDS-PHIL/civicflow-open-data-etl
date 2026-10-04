@@ -1,123 +1,46 @@
-# CivicFlow Open Data ETL Skeleton
+#  CivicFlow: Enterprise Open Data ETL & LIM-Lite Dashboard
 
-A proof-of-concept Extract, Transform, Load (ETL) pipeline designed to help local governments streamline public data workflows. This skeleton is intended for **public data only** and must not be used with internal, secure, or sensitive APIs without proper authorization and security review.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-FF4B4B.svg)](https://streamlit.io/)
+[![Pydantic v2](https://img.shields.io/badge/Pydantic-v2-005571.svg)](https://docs.pydantic.dev/)
 
-## Purpose
+**CivicFlow** is an open-source, MIT-licensed data aggregation and validation framework designed specifically for New Zealand local government. It automates the extraction, transformation, and loading (ETL) of public open data, providing a resilient, auditable, and interactive platform for urban planning and LIM (Land Information Memorandum) report workflows.
 
-Designed to help New Zealand local governments (e.g., Wellington City Council) automate and validate public open data pipelines (such as District Plan overlays or public facility assets), preventing geospatial data corruption in downstream systems like LIM report generators or Snowflake data warehouses.
+## 🎯 Purpose & Strategic Alignment
 
-This project provides a reusable skeleton for building ETL pipelines that:
-- Extract data from public REST APIs
-- Transform and validate the data using Pydantic models
-- Load the cleaned data into CSV or Parquet files for downstream analysis
+Designed to help local councils (e.g., Wellington City Council) automate and validate public open data pipelines. CivicFlow directly addresses operational inefficiencies highlighted in strategic reviews (such as WCC's *Future Fit Pōneke* report) by:
+- Reducing manual data cross-referencing across fragmented legacy systems.
+- Enforcing strict data governance and geospatial validation.
+- Providing a zero-license-fee, agile alternative to traditional enterprise software rollouts.
 
-It is designed to be easily adapted for various public datasets (e.g., building consents, resource consents, planning applications) by modifying the Pydantic models and mapping the API response.
+## ✨ Key Features (v1.0)
 
-## Disclaimer
+### 🛡️ Enterprise Data Governance
+- **Strict Validation:** Pydantic v2 models enforce NZ geospatial bounds and schema rules, preventing "garbage-in, garbage-out" scenarios.
+- **Graceful Degradation:** Automatically falls back to a secure local cache if public APIs timeout or fail, ensuring zero downtime for downstream users.
+- **Auditability:** Built-in Data Lineage and Observability tracking.
 
-⚠️ **IMPORTANT**: This is a proof-of-concept for **public data only**. 
-- Do NOT use this pipeline with internal, confidential, or secure government systems without explicit authorization.
-- Always ensure you have the right to access and redistribute any data you process.
-- This code does not include authentication, encryption, or other security measures required for sensitive data.
-- Users are responsible for complying with all relevant data protection laws and regulations (e.g., Privacy Act 2020 in New Zealand).
+### 📊 Interactive LIM-Lite Dashboard
+- **Spatial Analytics:** Interactive PyDeck map visualizing District Plan overlays and demographic data.
+- **Workflow Automation:** One-click generation of branded LIM Summary PDFs for specific properties.
+- **Data Export:** Real-time filtering and CSV export capabilities for council staff.
 
-## Technical Stack
+### 🐳 Container-Ready Deployment
+- Fully supported via **Docker** and **Docker Compose** for secure, reproducible deployment in council environments.
 
-- Python 3.10+
-- [requests](https://pypi.org/project/requests/) for HTTP calls
-- [pandas](https://pypi.org/project/pandas/) for data manipulation
-- [pydantic](https://pypi.org/project/pydantic/) (v2) for data validation
-- [python-dotenv](https://pypi.org/project/python-dotenv/) for environment variable management
-- Standard [logging](https://docs.python.org/3/library/logging.html) for structured logs
+## 🏗️ Architecture
 
-## Project Structure
-
-```
+```text
 .
-├── .env.example          # Template for environment variables
-├── requirements.txt      # Python dependencies
-├── README.md             # This file
-├── main.py               # ETL pipeline orchestrator
-└── src
-    ├── __init__.py       # Package initializer
-    ├── models.py         # Pydantic models for data validation
-    ├── extract.py        # Data extraction logic
-    ├── transform.py      # Data transformation and validation
-    └── load.py           # Data loading (CSV/Parquet)
+── app.py                  # Streamlit Dashboard (UI/UX)
+├── main.py                 # ETL Pipeline Orchestrator
+├── src/
+│   ├── models.py           # Pydantic Data Models & Validation
+│   ├── extract.py          # API Extraction & Fallback Logic
+│   ├── transform.py        # Data Aggregation & Cleaning
+│   └── load.py             # Database/CSV Loading
+├── tests/                  # Pytest Unit Tests
+├── Dockerfile              # Containerization config
+└── docker-compose.yml      # Multi-container orchestration
 ```
-
-## Installation
-
-1. Clone the repository
-2. Create a virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Copy `.env.example` to `.env` and configure:
-   ```bash
-   cp .env.example .env
-   # Edit .env to set API_URL (and optionally OUTPUT_FORMAT, OUTPUT_PATH)
-   ```
-
-## Usage
-
-Run the ETL pipeline:
-```bash
-python main.py
-```
-
-The pipeline will:
-1. Extract data from the API endpoint specified in `API_URL` (defaults to a public placeholder API)
-2. Transform and validate the data using the Pydantic model in `src/models.py`
-3. Load the cleaned data to a file specified by `OUTPUT_PATH` (defaults to `output/data.csv`)
-
-### Configuration
-
-All configuration is done via environment variables (set in `.env`):
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `API_URL` | The public API endpoint to fetch data from | `https://jsonplaceholder.typicode.com/posts` |
-| `API_KEY` | API key if required (not used in the mock) | (empty) |
-| `OUTPUT_FORMAT` | Output file format: `csv` or `parquet` | `csv` |
-| `OUTPUT_PATH` | Full path to the output file | `output/data.csv` (or `output/data.parquet` if format is parquet) |
-
-## Development
-
-### Adding a New Dataset
-
-1. Update the Pydantic model in `src/models.py` to match the target dataset's schema.
-2. Modify the mapping logic in `src/transform.py` to map API response fields to the model fields.
-3. Adjust any data cleaning or validation rules as needed.
-4. Update the `.env.example` with the new API endpoint (if different).
-
-### 🧪 Running Tests
-
-To run the unit tests:
-1. Install test dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Execute pytest:
-   ```bash
-   pytest -v
-   ```
-
-This will run the tests in the `tests/` directory and report the results.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details (if included).
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Contact
-
-For questions or support, please open an issue in the repository.
